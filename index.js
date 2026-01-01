@@ -8,11 +8,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ===== RapidAPI Protection (PLACE ABOVE ROUTES) =====
+// ===== RapidAPI Key Protection =====
 app.use((req, res, next) => {
-  // Allow root health check without RapidAPI key
+  // Allow root route without key
   if (req.path === "/") return next();
 
+  // Skip key check in development
+  if (process.env.NODE_ENV !== "production") return next();
+
+  // Check for RapidAPI key in production
   if (!req.headers["x-rapidapi-key"]) {
     return res.status(403).json({
       error: "RapidAPI key required",
